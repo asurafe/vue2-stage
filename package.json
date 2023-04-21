@@ -1,0 +1,16 @@
+{
+  "name": "Vue",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type":"module",
+  "scripts": {
+    "dev": "rollup -cw"
+  },
+  "dependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "rollup": "^3.20.6",
+    "rollup-plugin-babel": "^4.4.0"
+  }
+}
