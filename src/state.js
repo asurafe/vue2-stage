@@ -23,7 +23,7 @@ function proxy(vm, target, key) {
         get() {
             return vm[target][key]
         },
-        set(newValue) { 
+        set(newValue) {
             // if(newValue == vm[target][key]) return
             vm[target][key] = newValue
         }
