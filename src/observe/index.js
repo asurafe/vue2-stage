@@ -4,7 +4,7 @@ import { newArrayProto } from "./array";
 class Observer {
     constructor(data) {
         // 给数据加了一个标识，如果数据上有__ob__,则说明这个属性被观测过
-        Object.defineProperties(data, '__ob__', {
+        Object.defineProperty(data, '__ob__', {
             value: this,
             // 将__ob__变成不可枚举的(循环的时候无法获取)
             enumerable: false
