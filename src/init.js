@@ -1,4 +1,5 @@
 import { complieToFunction } from "./compiler/index";
+import { mountComponent } from "./lifecycle";
 import { initState } from "./state";
 
 export function initMixin(Vue) {
@@ -31,13 +32,15 @@ export function initMixin(Vue) {
                 }
             }
             // 写了template 就用写了的template
-            if(template){
+            if (template) {
                 // 这里需要对模板进行编译,最终会编译成h('xxx')
                 const render = complieToFunction(template);
                 ops.render = render;
             }
         }
-        ops.render;
+        // 组件的挂载
+        mountComponent(vm, el);
+
         // script 标签引用的vue.global.js 这个编译过程是在浏览器运行的
         // runtime 是不包含模板编译的，整个编译时打包的时候通过loader来转义.vue文件的，用runtime的时候不能使用模板
     }

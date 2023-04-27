@@ -35,7 +35,7 @@ function gen(node) {
                 if (index > lastIndex) {
                     tokens.push(JSON.stringify(text.slice(lastIndex, index)))
                 }
-                tokens.push(`_s${match[1].trim()}`)
+                tokens.push(`_s(${match[1].trim()})`)
 
                 lastIndex = index + match[0].length
             }
@@ -61,5 +61,9 @@ export function complieToFunction(template) {
     // 1.将template转换为ast语法树
     let ast = parseHTML(template);
     // 2.生成render方法（render方法执行后的结果就是虚拟DOM）
-    console.log(codegen(ast))
+    let code = codegen(ast)
+    code = `with(this){return ${code}}`
+    let render = new Function(code)
+
+    return render
 }
