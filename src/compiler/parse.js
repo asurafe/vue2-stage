@@ -49,9 +49,9 @@ export function parseHTML(html) {
 
     }
     function chars(text) {
-        text = text.replace(/\s/g,'')
+        text = text.replace(/\s/g, '')
         // 文本直接放到当前指向的节点中
-        text&&currentParent.children.push({
+        text && currentParent.children.push({
             type: TEXT_TYPE,
             text,
             parent: currentParent
