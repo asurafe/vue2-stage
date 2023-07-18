@@ -1,31 +1,39 @@
-import { observe } from "./observe/index";
-
+import { observe } from './observer/index.js'
 export function initState(vm) {
     const opts = vm.$options;
+    if (opts.props) {
+        initProps(vm);
+    }
+    if (opts.methods) {
+        initMethod(vm);
+    }
     if (opts.data) {
-        initData(vm)
+        initData(vm);
     }
+    // computed ... watch
 }
-function initData(vm) {
-    let data = vm.$options.data;
-    data = typeof data === 'function' ? data.call(vm) : data;
-
-    vm._data = data
-    observe(data)
-    // 将vm.__data 用vm来代理
-    for (let key in data) {
-        proxy(vm, '_data', key)
-
-    }
-}
-function proxy(vm, target, key) {
-    Object.defineProperty(vm, key, {
-        get() {
-            return vm[target][key]
+function initProps() {}
+function initMethod() {}
+function proxy(target,property,key){
+    Object.defineProperty(target,key,{
+        get(){
+            return target[property][key];
         },
-        set(newValue) {
-            // if(newValue == vm[target][key]) return
-            vm[target][key] = newValue
+        set(newValue){
+            target[property][key] = newValue
         }
     })
+}
+function initData(vm) {
+    // 数据响应式原理
+    let data = vm.$options.data; // 用户传入的数据
+    // vm._data 就是检测后的数据了
+    data = vm._data = typeof data === 'function' ? data.call(vm) : data;
+    // 观测数据
+    // 将数据全部代理到vm的实例上
+
+    for(let key in data){
+        proxy(vm,'_data',key);
+    }
+    observe(data); // 观测这个数据
 }

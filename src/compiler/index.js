@@ -1,69 +1,36 @@
-import { parseHTML } from "./parse";
+import {parseHTML} from './parser.js'
+import {generate} from './generator.js';
+export function compileToFunctions(template){
+    // console.log(template)
+    // 实现模板的编译
 
-function genProps(attrs) {
-    let str = ''
-    for (let i = 0; i < attrs.length; i++) {
-        let attr = attrs[i];
-        if (attr.name == 'style') {
-            let obj = {};
-            attr.value.split(";").forEach((item) => {
-                let [key, value] = item.split(":");
-                obj[key] = value
-            })
-            attr.value = obj
-        }
-        str += `${attr.name}:${JSON.stringify(attr.value)},`
-    }
-    return `{${str.slice(0, -1)}}`
-}
-const defaultTagRE = /\{\{((?:.|\r?\r)+?)\}\}/g;
-
-function gen(node) {
-    if (node.type == 1) {
-        return codegen(node)
-    } else {
-        let text = node.text
-        if (!defaultTagRE.test(text)) {
-            return `_v(${JSON.stringify(text)})`
-        } else {
-            let tokens = [];
-            let match;
-            defaultTagRE.lastIndex = 0;
-            let lastIndex = 0;
-            while (match = defaultTagRE.exec(text)) {
-                let index = match.index
-                if (index > lastIndex) {
-                    tokens.push(JSON.stringify(text.slice(lastIndex, index)))
-                }
-                tokens.push(`_s(${match[1].trim()})`)
-
-                lastIndex = index + match[0].length
-            }
-            if (lastIndex < text.length) {
-                tokens.push(JSON.stringify(text.slice(lastIndex)))
-            }
-            return `_v(${tokens.join('+')})`
-        }
-    }
-}
-
-function genChildren(children) {
-    return children.map(child => gen(child)).join(',')
-}
-
-function codegen(ast) {
-    let children = genChildren(ast.children)
-    let code = `_c('${ast.tag}',${ast.attrs.length > 0 ? genProps(ast.attrs) : 'null'}${ast.children.length ? `,${children}` : ''})`
-    return code
-}
-
-export function complieToFunction(template) {
-    // 1.将template转换为ast语法树
     let ast = parseHTML(template);
-    // 2.生成render方法（render方法执行后的结果就是虚拟DOM）
-    let code = codegen(ast)
-    code = `with(this){return ${code}}`
-    let render = new Function(code)
 
-    return render
+    // 代码生成
+    // template => render 函数
+
+    /**
+     * react 
+     * render(){ 
+        * with(this){
+        *  return _c('div',{id:app,style:{color:red}},_c('span',undefined,_v("helloworld"+_s(msg)) ))
+        * }
+     * }
+     * 
+     */
+    // 核心就是字符串拼接
+    let code = generate(ast); // 代码生成 =》 拼接字符串
+    
+    code = `with(this){ \r\nreturn ${code} \r\n}`;
+
+    let render = new Function(code); // 相当于给字符串变成了函数
+
+
+    // 注释节点 自闭和标签 事件绑定 @click  class slot插槽
+
+    return render;
+    // 模板编译原理 
+    // 1.先把我们的代码转化成ast语法树 （1）  parser 解析  (正则)
+    // 2.标记静态树  （2） 树得遍历标记 markup  只是优化
+    // 3.通过ast产生的语法树 生成 代码 =》 render函数  codegen
 }

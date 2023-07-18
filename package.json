@@ -1,17 +1,19 @@
 {
-  "name": "Vue",
+  "name": "vue-source",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
-  "license": "MIT",
-  "type": "module",
   "scripts": {
-    "dev": "rollup -cw"
+    "serve": "rollup -c -w"
   },
-  "dependencies": {
-    "@babel/core": "^7.21.4",
-    "@babel/preset-env": "^7.21.4",
-    "@rollup/plugin-node-resolve": "^15.0.2",
-    "rollup": "^3.20.6",
-    "rollup-plugin-babel": "^4.4.0"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "rollup": "^2.15.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-serve": "^1.0.1"
   }
 }

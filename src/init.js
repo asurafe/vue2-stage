@@ -1,47 +1,47 @@
-import { complieToFunction } from "./compiler/index";
-import { mountComponent } from "./lifecycle";
-import { initState } from "./state";
-
+import { initState } from './state';
+import {compileToFunctions} from './compiler/index.js';
+import {mountComponent, callHook} from './lifecycle.js'
+import { mergeOptions } from './utils';
+import { nextTick } from './observer/scheduler';
 export function initMixin(Vue) {
-    Vue.prototype._init = function (options) {
+   
+    Vue.prototype._init = function(options) {
+        // Vue的内部 $options 就是用户传递的所有参数
         const vm = this;
-        vm.$options = options;
+        // 这个options 就包含了用户创建实例时传入的所有属性 Vue.options
+        vm.$options = mergeOptions(vm.constructor.options,options); // 用户传入的参数
 
-        initState(vm)
+        callHook(vm,'beforeCreate')
+        initState(vm); // 初始化状态
 
-        if (options.el) {
-            // 实现数据的挂载
-            vm.$mount(options.el)
+        callHook(vm,'created')
+        // 需要通过模板进行渲染
+        if (vm.$options.el) { // 用户传入了el属性
+            vm.$mount(vm.$options.el)
         }
     }
-    Vue.prototype.$mount = function (el) {
+    Vue.prototype.$mount = function (el) { // 可能是字符串 也可以传入一个dom对象
         const vm = this;
-        let ops = vm.$options
-        el = document.querySelector(el);
-        // 先查找有没有render函数
-        if (!ops.render) {
-            // 没有render看一下是否写了template，没写template就采用外部的template
-            let template;
-            // 没有写模板 但是写了el
-            if (!ops.template && el) {
-                template = el.outerHTML
-            } else {
-                // 如果有el，则采用模板中的内容
-                if (el) {
-                    template = ops.template
-                }
-            }
-            // 写了template 就用写了的template
-            if (template) {
-                // 这里需要对模板进行编译,最终会编译成h('xxx')
-                const render = complieToFunction(template);
-                ops.render = render;
-            }
-        }
-        // 组件的挂载
-        mountComponent(vm, el);
+        el = vm.$el = document.querySelector(el); // 获取el属性
 
-        // script 标签引用的vue.global.js 这个编译过程是在浏览器运行的
-        // runtime 是不包含模板编译的，整个编译时打包的时候通过loader来转义.vue文件的，用runtime的时候不能使用模板
+        // 如果同时传入 template 和render  默认会采用render 抛弃template，如果都没传就使用id="app"中的模板
+        const opts = vm.$options;
+
+        if(!opts.render){
+            let template = opts.template;
+            if(!template && el){ // 应该使用外部的模板
+                template = el.outerHTML;
+                console.log(template)
+            }
+            
+            const render = compileToFunctions(template);
+            opts.render = render;
+        }
+
+        // 走到这里说明不需要编译了 ，因为用户传入的就是 一个render函数
+
+        mountComponent(vm,el); // 组件的挂载流程
     }
+   
 }
+
